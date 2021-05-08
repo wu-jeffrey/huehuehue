@@ -1,6 +1,10 @@
-#define RED_LED 6
-#define BLUE_LED 5
-#define GREEN_LED 7
+#include <SoftwareSerial.h>
+
+#define RED_LED 5
+#define GREEN_LED 6
+#define BLUE_LED 9
+
+SoftwareSerial hc06(2,3);
 
 int brightness = 255;
 int gBright = 0;
@@ -10,16 +14,35 @@ int fadeSpeed = 10;
 
 void setup() {
     Serial.begin(9600);
-    pinMode(GREEN_LED, OUTPUT);
     pinMode(RED_LED, OUTPUT);
+    pinMode(GREEN_LED, OUTPUT);
     pinMode(BLUE_LED, OUTPUT);
+    
+    hc06.begin(9600);
 }
 
 void loop() {
-    _TurnOn(RED_LED);
-    _TurnOn(BLUE_LED);
-    _TurnOn(GREEN_LED);
-    _TurnOff();
+  if (hc06.available()){
+    char input = hc06.read();
+    
+    switch (input) {
+      case 'r':
+        Serial.write("red");
+        _TurnOn(RED_LED);
+        break;
+      case 'b':
+        Serial.write("blue");
+        _TurnOn(BLUE_LED);
+        break;
+      case 'g':
+        Serial.write("green");
+        _TurnOn(GREEN_LED);
+        break;
+    }
+  }
+  delay(10);
+  _TurnOff();
+  delay(10);
 }
 
 void _TurnOn(int pin) {
@@ -30,12 +53,7 @@ void _TurnOn(int pin) {
 }
 
 void _TurnOff() {
-    for (int i = 0; i < 256; i++) {
-        analogWrite(GREEN_LED, brightness);
-        analogWrite(RED_LED, brightness);
-        analogWrite(BLUE_LED, brightness);
-
-        brightness -= 1;
-        delay(fadeSpeed);
-    }
+  analogWrite(GREEN_LED, 0);
+  analogWrite(RED_LED, 0);
+  analogWrite(BLUE_LED, 0);
 }
